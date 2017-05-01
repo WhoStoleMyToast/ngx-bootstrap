@@ -1,5 +1,5 @@
 import {
-  Component, ElementRef, TemplateRef, ViewEncapsulation, HostListener
+  Component, ElementRef, TemplateRef, ViewEncapsulation, HostListener, ViewChild
 } from '@angular/core';
 import { isBs3 } from '../utils/ng2-bootstrap-config';
 import { TypeaheadDirective } from './typeahead.directive';
@@ -15,7 +15,7 @@ import { latinize } from './typeahead-utils';
   [ngOutletContext]="{matches:matches, itemTemplate:itemTemplate, query:query}"></template>
 
 <!-- default options item template -->
-<template #bsItemTemplate let-match="match" let-query="query"><span [innerHtml]="hightlight(match, query)"></span></template>
+<template #bsItemTemplate let-match="match" let-query="query"><span #myMatch [innerHtml]="hightlight(match, query)"></span></template>
 
 <!-- Bootstrap 3 options list template -->
 <template #bs3Template>
@@ -23,7 +23,7 @@ import { latinize } from './typeahead-utils';
   <template ngFor let-match let-i="index" [ngForOf]="matches">
     <li *ngIf="match.isHeader()" class="dropdown-header">{{match}}</li>
     <li *ngIf="!match.isHeader()" [class.active]="isActive(match)" (mouseenter)="selectActive(match)">
-      <a href="#" (click)="selectMatch(match, $event)" tabindex="-1">
+      <a #myMatch href="#" (click)="selectMatch(match, $event)" tabindex="-1">
         <template [ngTemplateOutlet]="itemTemplate || bsItemTemplate" 
           [ngOutletContext]="{item:match.item, index:i, match:match, query:query}"></template>
       </a>
@@ -52,7 +52,7 @@ import { latinize } from './typeahead-utils';
   // tslint:disable
   host: {
     'class': 'dropdown open',
-    '[class.dropdown-menu]':'isBs4',
+    '[class.dropdown-menu]': 'isBs4',
     style: 'position: absolute;display: block;'
   },
   // tslint: enable
@@ -67,8 +67,11 @@ export class TypeaheadContainerComponent {
   public left: string;
   public display: string;
   public placement: string;
+  //@ViewChild('match') myMatch : TypeaheadMatch
+  @ViewChild('myMatch') el: ElementRef;
+  win: Window;
 
-  public get isBs4():boolean {
+  public get isBs4(): boolean {
     return !isBs3();
   }
 
@@ -129,6 +132,11 @@ export class TypeaheadContainerComponent {
     if (this._active.isHeader()) {
       this.nextActiveMatch();
     }
+
+    var top = this.el.nativeElement.position().top;
+    this.win.scrollTo(top);
+
+    //this.el.nativeElement.scrollIntoView(false);
   }
 
   public selectActive(value: TypeaheadMatch): void {

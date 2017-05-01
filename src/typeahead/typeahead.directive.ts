@@ -88,9 +88,12 @@ export class TypeaheadDirective implements OnInit, OnDestroy {
   protected renderer: Renderer;
 
   private _typeahead: ComponentLoader<TypeaheadContainerComponent>;
+  private upped: boolean = false;
 
   @HostListener('keyup', ['$event'])
   public onChange(e: any): void {
+
+    console.log("uuup");
     if (this._container) {
       // esc
       if (e.keyCode === 27) {
@@ -100,13 +103,13 @@ export class TypeaheadDirective implements OnInit, OnDestroy {
 
       // up
       if (e.keyCode === 38) {
-        this._container.prevActiveMatch();
+        //this._container.prevActiveMatch();
         return;
       }
 
       // down
       if (e.keyCode === 40) {
-        this._container.nextActiveMatch();
+        //this._container.nextActiveMatch();
         return;
       }
 
@@ -150,10 +153,25 @@ export class TypeaheadDirective implements OnInit, OnDestroy {
 
   @HostListener('keydown', ['$event'])
   public onKeydown(e: any): void {
+
+    this.upped = false;
+
     // no container - no problems
     if (!this._container) {
       return;
     }
+
+    // down
+      while (e.keyCode === 40 && this.upped === false) {
+        this._container.nextActiveMatch();
+        return;
+      }
+
+      // up
+      while (e.keyCode === 38 && this.upped === false) {
+        this._container.prevActiveMatch();
+        return;
+      }
 
     // if items is visible - prevent form submition
     if (e.keyCode === 13) {
